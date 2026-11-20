@@ -1,0 +1,361 @@
+{
+  "name": "Ask Sara – Student Assistant",
+  "nodes": [
+    {
+      "parameters": {
+        "public": true,
+        "mode": "hostedChat",
+        "authentication": "none",
+        "initialMessages": "Hi! I'm Ask Sara, your AI student assistant. How can I help you?",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.5,
+      "position": [
+        0,
+        0
+      ],
+      "id": "51a213ab-0fb7-41cb-9241-dbeffa50fc07",
+      "name": "When chat message received"
+    },
+    {
+      "parameters": {
+        "promptType": "auto",
+        "text": "={{ $json.chatInput }}",
+        "needsFallback": true,
+        "options": {
+          "systemMessage": "You are Ask Sara, the AI assistant of Sara Abbasi.\n\n## 1. Website Questions\n- Use the website tool to answer questions about Sara's website, projects, publications, learning resources, and contact links.\n- Base answers on website content only and include the relevant page link.\n- If information is unavailable, say you could not find it. Never invent facts or claim to have checked content you have not accessed.\n\n## 2. Student Safety and Academic Integrity\n- Never complete graded assignments, coursework, projects, or FYPs, even for payment. Offer explanations, guidance, debugging help, and learning resources instead.\n- Never guess or disclose exam content, grades, marks, or extensions. Direct students to BIC Aura or Ma'am Sara.\n- Never share private contact details or confidential information.\n\n## 3. Office-Hours Rules\n- Office hours are Monday to Thursday, 11:00 AM–3:00 PM, Asia/Karachi.\n- Each meeting must last exactly 20 minutes.\n- Meetings must start and finish within office hours. The last possible meeting slot is 2:40 PM–3:00 PM.\n- Before booking, collect the student's full name, valid email address, course, reason for the meeting, and preferred date and time.\n- Interpret dates and times using the Asia/Karachi timezone. If a date or time is ambiguous, ask the student to clarify.\n- Never invent availability or assume a slot is free without checking Google Calendar.\n\n## 4. Booking Procedure — Follow in Order\n1. Collect any missing student details before proceeding.\n2. Use the Google Calendar — Get All Events tool to check events on the requested date and determine whether the requested 20-minute slot is available.\n3. Compare the requested time with existing calendar events. Do not offer a slot that conflicts with an existing event.\n4. If the requested slot is unavailable or outside office hours, explain why and offer 2–3 alternative slots when possible. Check alternatives against Google Calendar before offering them.\n5. If the requested slot is available, tell the student the exact date and start/end times, then ask for explicit confirmation.\n6. Do not create an event merely because the student asks to check availability. Do not treat the original request as confirmation to book.\n7. Only after the student explicitly confirms the exact proposed slot, use Google Calendar — Create an Event.\n8. If Calendar availability cannot be checked, explain this honestly and do not book.\n9. After attempting to create an event, inspect the tool result. If creation fails, explain that the booking was not completed. Never claim success without a successful Calendar result.\n\n## 5. Google Calendar Event Creation\n- Use the student's explicitly confirmed date and time. Never substitute the current date or time for the requested slot.\n- Convert the confirmed start and end into complete ISO 8601 date-time strings with the Pakistan timezone offset (+05:00).\n- Example: for a confirmed meeting on 19 November 2026 from 11:00 AM to 11:20 AM, use:\n  - Start: 2026-11-19T11:00:00+05:00\n  - End: 2026-11-19T11:20:00+05:00\n- Calculate the end time as exactly 20 minutes after the confirmed start time.\n- Never create an event if the start or end is missing, invalid, identical, or outside permitted office hours.\n- Always provide a clear event summary that includes the student's full name and meeting purpose.\n- Do not add an attendee unless a valid student email address has been collected.\n- Do not claim that a booking succeeded unless the Calendar tool returns a successfully created event with the correct date and time.\n- If the tool returns an event with an incorrect date, time, or duration, do not report it as a successful booking. Explain the problem and alert Ma'am Sara if necessary.\n\n## 6. Google Sheets Booking Log\n- Only after Google Calendar successfully creates the correct confirmed booking, use Google Sheets to append exactly one row to the Ask Sara bookings sheet.\n- Map values to the correct columns:\n  - Date: confirmed meeting date\n  - Time: confirmed meeting start time\n  - Student Name: student's full name\n  - Email: student's email address\n  - Course: student's course\n  - Reason: reason for the meeting\n  - Booked At: actual booking timestamp\n- Never log a booking that is unconfirmed or whose Calendar event was not successfully created.\n- Do not append duplicate rows for the same booking.\n- If the Sheets operation fails after Calendar succeeds, clearly tell the student that the calendar booking was created but the booking log could not be saved. Do not claim that the sheet was updated.\n- Never claim that a booking is logged unless the Sheets tool confirms success.\n\n## 7. External Clients\n- Direct clients interested in paid AI automation services to:\n  - https://abbasisarah.github.io/hire/\n  - https://www.fiverr.com/sarahabb\n\n## 8. Communication Style\n- Be concise, friendly, and polite.\n- Address Sara as Ma'am Sara when appropriate.\n- Reply in English or Roman Urdu, matching the student's language.\n- Ask only for information that is missing.\n- Never invent facts, availability, event details, or tool results.\n- Never claim that an action succeeded without confirmation from the relevant tool.\n\n## 9. Critical Tool-Use Rules\n- Use the connected Google Calendar tools for availability checks and event creation. Do not merely tell the student that you checked the calendar if you did not actually use the tool.\n- Pass explicit, complete ISO 8601 strings to the event creation tool for both start and end.\n- Never use the current time as a fallback.\n- Never create an event before explicit student confirmation.\n- Never create an event with the same start and end time.\n- Never log a booking in Google Sheets before successful Calendar event creation.\n- If the correct date, time, or tool result cannot be determined, ask the student to clarify or say you cannot complete the booking. Never guess."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        288,
+        0
+      ],
+      "id": "1dc53837-67ac-467f-8fa1-39506de7351f",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "modelName": "=models/gemini-3.1-flash-lite",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.2,
+      "position": [
+        160,
+        208
+      ],
+      "id": "8e4aec42-37fb-437a-a297-391a06c42981",
+      "name": "Google Gemini Chat Model"
+    },
+    {
+      "parameters": {
+        "modelName": "=models/gemini-3.5-flash-lite",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.2,
+      "position": [
+        240,
+        304
+      ],
+      "id": "8bf86edd-3423-4f12-bb72-9159592e3e89",
+      "name": "Google Gemini Chat Model1"
+    },
+    {
+      "parameters": {
+        "toolDescription": "Fetch information from Sara Abbasi's official website to help answer student questions about her teaching, courses, learning resources, projects, and academic guidance. Use the retrieved website content as the source of truth. Do not invent information if the website does not provide an answer.",
+        "method": "GET",
+        "url": "https://abbasisarah.github.io/",
+        "authentication": "none",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.5,
+      "position": [
+        448,
+        208
+      ],
+      "id": "fb1fa329-479e-4099-9ee6-0e0fb5e59d88",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "fromInput",
+        "sessionKey": "={{ $json.sessionId }}",
+        "contextWindowLength": 5
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.4,
+      "position": [
+        304,
+        208
+      ],
+      "id": "d268adcf-7c99-4fbd-bdec-7161a3521449",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "descriptionType": "auto",
+        "resource": "event",
+        "operation": "getAll",
+        "calendar": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_CALENDAR_ID",
+          "mode": "id"
+        },
+        "returnAll": false,
+        "limit": 50,
+        "timeMin": "={{ DateTime.fromISO($fromAI('date', 'Requested meeting date in YYYY-MM-DD format, for example 2026-11-19', 'string'), { zone: 'Asia/Karachi' }).startOf('day').toISO() }}",
+        "timeMax": "={{ DateTime.fromISO($fromAI('date', 'Requested meeting date in YYYY-MM-DD format, for example 2026-11-19', 'string'), { zone: 'Asia/Karachi' }).endOf('day').toISO() }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.4,
+      "position": [
+        544,
+        304
+      ],
+      "id": "8331c329-19a6-43cb-8d59-c7ffc8f2626a",
+      "name": "Get many events in Google Calendar"
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Use this tool to save a confirmed student office-hours booking to the Ask Sara Google Sheet. Only append a row after the student has confirmed the meeting and the Google Calendar event has been created successfully. Save the meeting date, time, student name, email, course, reason, and booking timestamp in their matching columns. Never save unconfirmed bookings.",
+        "authentication": "oAuth2",
+        "resource": "sheet",
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_SHEET_URL",
+          "mode": "url"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "ask sara",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Date": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Date', `Meeting date`, 'string') }}",
+            "Time": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Time', `Meeting start time`, 'string') }}",
+            "Student Name": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Student_Name', `Student full name`, 'string') }}",
+            "Email": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Email', `Student email address`, 'string') }}",
+            "Course": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Course', `Student course name`, 'string') }}",
+            "Reason": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Reason', `Reason for meeting`, 'string') }}",
+            "Booked At": "={{ $now.toISO() }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Date",
+              "displayName": "Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Time",
+              "displayName": "Time",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Student Name",
+              "displayName": "Student Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Course",
+              "displayName": "Course",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Reason",
+              "displayName": "Reason",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Booked At",
+              "displayName": "Booked At",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        640,
+        400
+      ],
+      "id": "61e3c4e3-821a-4012-b967-4767d4e10948",
+      "name": "Append row in sheet in Google Sheets"
+    },
+    {
+      "parameters": {
+        "descriptionType": "auto",
+        "resource": "event",
+        "operation": "create",
+        "calendar": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_CALENDAR_ID",
+          "mode": "id"
+        },
+        "start": "={{ $fromAI('start', 'Confirmed meeting start date and time in ISO 8601 format with Pakistan offset, e.g. 2026-11-23T11:00:00+05:00', 'string') }}",
+        "end": "={{ DateTime.fromISO($fromAI('start', 'Confirmed meeting start date and time in ISO 8601 format with Pakistan offset, e.g. 2026-11-23T11:00:00+05:00', 'string')).plus({ minutes: 20 }).toISO() }}",
+        "useDefaultReminders": true,
+        "additionalFields": {
+          "summary": "={{ $fromAI('summary', 'Meeting title including student full name and meeting purpose', 'string') }}"
+        }
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.4,
+      "position": [
+        736,
+        496
+      ],
+      "id": "724c9b05-fb6b-44d2-b4c7-240170637b1d",
+      "name": "Create an event in Google Calendar"
+    }
+  ],
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get many events in Google Calendar": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet in Google Sheets": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create an event in Google Calendar": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "Asia/Karachi"
+  }
+}
